@@ -45,22 +45,34 @@ class Player:
                         self.competitive_support = rating["level"]
 
     def __repr__(self):
-        return f"<Player {self.bnet}> success: {self.success}"
+        return f"<Player {self.bnet} success: {self.success}>"
 
 
-async def _get_player(player: str, session):
+async def _get_player_internal(player: str, session):
     async with session.get(f"https://ow-api.com/v1/stats/pc/eu/{player.replace('#', '-')}/profile") as resp:
         data = await resp.json()
         return Player(player, data)
 
 
-async def get_player(player: str) -> Player:
+async def _get_player(player: str) -> Player:
     async with aiohttp.ClientSession() as session:
-        result = await _get_player(player, session)
+        result = await _get_player_internal(player, session)
         return result
 
 
-async def get_bulk_players(players: list) -> List[Player]:
+def get_player(player: str):
+    loop = asyncio.get_event_loop()
+    result = loop.run_until_complete(_get_player(player))
+    return result
+
+
+async def _get_bulk_players(players: list) -> List[Player]:
     async with aiohttp.ClientSession() as session:
         result = await asyncio.gather(*[_get_player(player, session) for player in players])
         return result
+
+
+def get_bulk_players(players: list) -> List[Player]:
+    loop = asyncio.get_event_loop()
+    result = loop.run_until_complete(_get_bulk_players(players))
+    return result
