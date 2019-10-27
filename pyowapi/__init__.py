@@ -68,7 +68,7 @@ def get_player(player: str):
 
 async def _get_bulk_players(players: list) -> List[Player]:
     async with aiohttp.ClientSession() as session:
-        result = await asyncio.gather(*[_get_player(player, session) for player in players])
+        result = await asyncio.gather(*[_get_player_internal(player, session) for player in players])
         return result
 
 
