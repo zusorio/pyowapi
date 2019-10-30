@@ -36,22 +36,26 @@ class Player:
                 self.competitive_damage = False
                 self.competitive_support = False
 
-                for rating in response["ratings"]:
-                    if rating["role"] == "tank":
-                        self.competitive_tank = rating["level"]
-                    if rating["role"] == "damage":
-                        self.competitive_damage = rating["level"]
-                    if rating["role"] == "support":
-                        self.competitive_support = rating["level"]
+                if response["ratings"]:
+                    for rating in response["ratings"]:
+                        if rating["role"] == "tank":
+                            self.competitive_tank = rating["level"]
+                        if rating["role"] == "damage":
+                            self.competitive_damage = rating["level"]
+                        if rating["role"] == "support":
+                            self.competitive_support = rating["level"]
 
     def __repr__(self):
         return f"<Player {self.bnet} success: {self.success}>"
 
 
 async def _get_player_internal(player: str, session):
-    async with session.get(f"https://ow-api.com/v1/stats/pc/eu/{player.replace('#', '-')}/profile") as resp:
-        data = await resp.json()
-        return Player(player, data)
+    try:
+        async with session.get(f"https://ow-api.com/v1/stats/pc/eu/{player.replace('#', '-')}/profile") as resp:
+            data = await resp.json()
+            return Player(player, data)
+    except TimeoutError:
+        return Player(player, {"error": "timeout"})
 
 
 async def _get_player(player: str) -> Player:
