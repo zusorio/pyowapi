@@ -10,6 +10,7 @@ import pyowapi
 
 # For a single player
 player = pyowapi.get_player("Jayne#1447")
+print(player.success)
 print(player.actual_level)
 print(player.private)
 print(player.competitive_tank)
@@ -35,6 +36,8 @@ for single_player in players:
     print(player.actual_level)
 
 A player has the following properties
+print(player.bnet)  # The battletag of the Player
+print(player.success)  # If the request was successful
 print(player.level)  # The number in Overwatch without stars calculated in
 print(player.prestige)  # The number of stars in Overwatch
 print(player.actual_level)  # The full level with stars calculated in
