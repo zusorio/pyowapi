@@ -57,7 +57,7 @@ async def _get_player_internal(player: str, session: aiohttp.ClientSession) -> P
     :return: A Player object
     """
     try:
-        async with session.get(f"https://ow-api.com/v1/stats/pc/eu/{player.replace('#', '-')}/profile") as resp:
+        async with session.get(f"https://ow-api.com/v2/stats/pc/{player.replace('#', '-')}/profile") as resp:
             data = await resp.json()
             return Player(player, data)
     except TimeoutError:
