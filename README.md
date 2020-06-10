@@ -1,5 +1,5 @@
 # pyowapi
-`pyowapi` is an asynchronous wrapper around an official Overwatch api (https://ow-api.com) using aiohttp.
+`pyowapi` is an asynchronous wrapper around an unofficial Overwatch api (https://ow-api.com) using aiohttp.
 
 # Example usage
 
