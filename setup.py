@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyowapi",
-    version="1.1.0",
+    version="2.0.0",
     author="Tobias Messner",
     author_email="tobias.d.messner@gmail.com",
     description="An asynchronous wrapper for ow-api.com using aiohttp",
