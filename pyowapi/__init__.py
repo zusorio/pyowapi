@@ -52,6 +52,13 @@ class Player:
 
 
 async def _correct_player_internal(session: aiohttp.ClientSession, incorrect_player_name: str, platform: str = "pc") -> Optional[Player]:
+    """
+    Attempts to find the corrected player name and returns a Player object if it does
+    :param session: An aiohttp ClientSession
+    :param incorrect_player_name: The incorrect player name to correct
+    :param platform: Platform, can be pc, xbox, ps4 and nintendo-switch
+    :return: A player object if a corrected battletag is found
+    """
     search_terms = []
     if platform == "pc":
         # Use full name to correct wrong capitalization
@@ -68,7 +75,7 @@ async def _correct_player_internal(session: aiohttp.ClientSession, incorrect_pla
         async with session.get(f"https://playoverwatch.com/en-us/search/account-by-name/{search_term}") as r:
             if r.status == 200:
                 profiles = await r.json()
-                # Filter the data to only include PC battletags
+                # Filter the data to only include names from the platform
                 profiles = [profile for profile in profiles if profile["platform"] == platform]
                 # If we have one match that must be it
                 if len(profiles) == 1:
@@ -78,26 +85,41 @@ async def _correct_player_internal(session: aiohttp.ClientSession, incorrect_pla
                         return new_player
 
 
-async def _get_player_internal(session: aiohttp.ClientSession, player_name: str, platform: str = "pc") -> Player:
+async def _get_player_internal(session: aiohttp.ClientSession, player_name: str, platform: str = "pc", correct_player: bool = False) -> Player:
     """
     Uses an aiohttp session to get a player. This is a coroutine and must be awaited.
-    :param player_name: String that is the players name (battletag or other)
     :param session: An aiohttp ClientSession
+    :param player_name: String that is the players name (battletag or other)
+    :param platform: Platform, can be pc, xbox, ps4 and nintendo-switch
+    :param correct_player: If True and the lookup fails a correction will be attempted.
     :return: A Player object
     """
     try:
         async with session.get(
                 f"https://ow-api.com/v2/stats/{platform}/{player_name.replace('#', '-')}/profile") as resp:
             data = await resp.json()
-            return Player(player_name, data)
+            player = Player(player_name, data)
+            if not correct_player:
+                return player
+            elif player.success:
+                return player
+            else:
+                new_player = await _correct_player_internal(session, player_name, platform)
+                if new_player:
+                    return new_player
+                else:
+                    return player
+
     except TimeoutError:
         return Player(player_name, {"error": "timeout"})
 
 
-async def _get_player(player_names: Union[str, List[str]], platform: str = "pc") -> Union[Player, List[Player]]:
+async def get_player_async(player_names: Union[str, List[str]], platform: str = "pc", correct_player: bool = False) -> Union[Player, List[Player]]:
     """
     This is a coroutine and must be awaited.
     :param player_names: String that is the players name (battletag or other)
+    :param platform: Platform, can be pc, xbox, ps4 and nintendo-switch
+    :param correct_player: If True and the lookup fails a correction will be attempted.
     :return: A Player object
     """
     async with aiohttp.ClientSession() as session:
@@ -105,17 +127,18 @@ async def _get_player(player_names: Union[str, List[str]], platform: str = "pc")
             result = await asyncio.gather(*[_get_player_internal(session, player, platform) for player in player_names])
             return result
         else:
-            result = await _get_player_internal(session, player_names, platform)
+            result = await _get_player_internal(session, player_names, platform, correct_player)
             return result
 
 
-def get_player(player_names: Union[str, List[str]], platform: str = "pc") -> Union[Player, List[Player]]:
+def get_player(player_names: Union[str, List[str]], platform: str = "pc", correct_player: bool = False) -> Union[Player, List[Player]]:
     """
     Automatically creates event loop. Does not work with programs that already have an event loop, await _get_player instead
     :param player_names: String that is the players name (battletag or other)
     :param platform: Platform, can be pc, xbox, ps4 and nintendo-switch
+    :param correct_player: If True and the lookup fails a correction will be attempted.
     :return: A Player object
     """
     loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(_get_player(player_names, platform))
+    result = loop.run_until_complete(get_player_async(player_names, platform, correct_player))
     return result

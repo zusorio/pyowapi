@@ -7,7 +7,7 @@ setuptools.setup(
     name="pyowapi",
     version="2.0.0",
     author="Tobias Messner",
-    author_email="tobias.d.messner@gmail.com",
+    author_email="tobias@zusor.io",
     description="An asynchronous wrapper for ow-api.com using aiohttp",
     long_description=long_description,
     long_description_content_type="text/markdown",
