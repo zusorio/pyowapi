@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyowapi",
-    version="2.0.0",
+    version="3.0.0",
     author="Tobias Messner",
     author_email="tobias@zusor.io",
     description="An asynchronous wrapper for ow-api.com using aiohttp",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ZusorCode/pyowapi",
+    url="https://github.com/zusorio/pyowapi",
     packages=setuptools.find_packages(),
     install_requires=["aiohttp"],
     classifiers=[
@@ -19,7 +19,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     test_suite='nose.collector',
     tests_require=['nose'],
 )
